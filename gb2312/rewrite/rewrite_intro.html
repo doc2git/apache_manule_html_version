@@ -1,0 +1,140 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<meta name="keywords" content="Apache, 中文, 手册, 中文版, 中文手册, 中文版手册, 参考手册, 中文参考手册, 金步国" />
+<meta name="description" content="Apache 2.2 中文版参考手册" />
+<meta name="author" content="金步国" />
+<link href="../style/css/manual-zip.css" rel="stylesheet" media="all" type="text/css" title="Main stylesheet" />
+<link href="../style/css/manual-zip-100pc.css" rel="alternate stylesheet" media="all" type="text/css" title="No Sidebar - Default font size" />
+<link href="../style/css/manual-print.css" rel="stylesheet" media="print" type="text/css" />
+<title>Apache mod_rewrite Introduction － Apache 2.2 中文版参考手册</title>
+</head>
+<body id="manual-page"><div id="page-header">
+<p class="menu"><a href="../mod/index.html">模块索引</a> | <a href="../mod/directives.html">指令索引</a> | <a href="../faq/index.html">常见问题</a> | <a href="../glossary.html">词汇表</a> | <a href="../sitemap.html">站点导航</a></p><p class="apache">Apache HTTP Server 版本2.2</p><img alt="" src="../images/feather.gif" /></div>
+<div class="up"><a href="./index.html"><img title="&lt;-" alt="&lt;-" src="../images/left.gif" /></a></div>
+<div id="path"><a href="http://www.apache.org/">Apache</a> &gt; <a href="http://httpd.apache.org/">HTTP Server</a> &gt; <a href="http://httpd.apache.org/docs/">文档</a> &gt; <a href="../index.html">版本2.2</a> &gt; <a href="index.html">URL重写</a></div>
+
+<div id="translation-info">　　 <a href="../translator_announcement.html#thanks">致谢</a> | <a href="../translator_announcement.html#announcement">译者声明</a> | 本篇译者：&lt;<a href="../translator_announcement.html#join">虚位以待</a>&gt; | 本篇译稿完成时间：?年?月?日 | <a href="../translator_announcement.html#last_new">获取最新版本</a></div>
+<div id="page-content"><div id="preamble"><h1>Apache mod_rewrite Introduction</h1>
+
+
+<p>This document supplements the <code class="module"><a href="../mod/mod_rewrite.html">mod_rewrite</a></code>
+<a href="../mod/mod_rewrite.html">reference documentation</a>. It
+describes the basic concepts necessary for use of
+<code class="module"><a href="../mod/mod_rewrite.html">mod_rewrite</a></code>. Other documents go into greater detail,
+but this doc should help the beginner get their feet wet.
+</p>
+</div>
+	<div class="top"><a href="#page-header"><img alt="top" src="../images/up.gif" /></a></div>
+<div class="section">
+<h2><a name="introduction" id="introduction">简介</a></h2>
+<p>The Apache module <code class="module"><a href="../mod/mod_rewrite.html">mod_rewrite</a></code> is a very powerful and
+sophisticated module which provides a way to do URL manipulations. With
+it, you can do nearly all types of URL rewriting that you may need. It
+is, however, somewhat complex, and may be intimidating to the beginner.
+There is also a tendency to treat rewrite rules as magic incantation,
+using them without actually understanding what they do.</p>
+
+<p>This document attempts to give sufficient background so that what
+follows is understood, rather than just copied blindly.
+</p>
+</div><div class="top"><a href="#page-header"><img alt="top" src="../images/up.gif" /></a></div>
+<div class="section">
+<h2><a name="regex" id="regex">Regular Expressions</a></h2>
+
+<p>mod_rewrite uses the <a href="http://pcre.org/">Perl Compatible
+Regular Expression</a> vocabulary. In this document, we do not attempt
+to provide a detailed reference to regular expressions. For that, we
+recommend the <a href="http://pcre.org/pcre.txt">PCRE man pages</a>, the
+<a href="http://www.perldoc.com/perl5.8.0/pod/perlre.html">Perl regular
+expression man page</a>, and <a href="http://www.oreilly.com/catalog/regex2/index.html">Mastering
+Regular Expressions, by Jeffrey Friedl</a>.</p>
+
+<p>In this document, we attempt to provide enough of a regex vocabulary
+to get you started, without being overwhelming, in the hope that
+<code class="directive"><a href="../mod/mod_rewrite.html#rewriterule">RewriteRule</a></code>s will be scientific
+formulae, rather than magical incantations.</p>
+
+<h3><a name="regexvocab" id="regexvocab">Regex vocabulary</a></h3>
+
+<p>The following are the minimal building blocks you will need, in order
+to write regular expressions and <code class="directive"><a href="../mod/mod_rewrite.html#rewriterule">RewriteRule</a></code>s.</p>
+
+<table border="1" cellpadding="0" cellspacing="0" bordercolor="#AAAAAA">
+<tr><th>Character</th><th>Meaning</th></tr>
+<tr><td><code>.</code></td><td>Matches any character</td></tr>
+</table>
+
+
+
+<h3><a name="InternalBackRefs" id="InternalBackRefs">Regex Back-Reference Availability</a></h3>
+
+      <p>One important thing here has to be remembered: Whenever you
+      use parentheses in <em>Pattern</em> or in one of the
+      <em>CondPattern</em>, back-references are internally created
+      which can be used with the strings <code>$N</code>和<code>%N</code> (see below). These are available for creating
+      the strings <em>Substitution</em>和<em>TestString</em>.
+      Figure 2 shows to which locations the back-references are
+      transferred for expansion.</p>
+
+<p class="figure">
+      <img src="../images/mod_rewrite_fig2.gif" width="381" height="179" alt="[Needs graphics capability to display]" /><br />
+      <dfn>Figure 2:</dfn> The back-reference flow through a rule.
+</p>
+
+
+</div><div class="top"><a href="#page-header"><img alt="top" src="../images/up.gif" /></a></div>
+<div class="section">
+<h2><a name="rewriterule" id="rewriterule">RewriteRule basics</a></h2>
+<p>
+Basic anatomy of a RewriteRule, with exhaustively annotated simple
+examples.
+</p>
+</div><div class="top"><a href="#page-header"><img alt="top" src="../images/up.gif" /></a></div>
+<div class="section">
+<h2><a name="flags" id="flags">Rewrite Flags</a></h2>
+<p>Discussion of the flags to RewriteRule, and when and why one might
+use them.</p>
+</div><div class="top"><a href="#page-header"><img alt="top" src="../images/up.gif" /></a></div>
+<div class="section">
+<h2><a name="rewritecond" id="rewritecond">Rewrite conditions</a></h2>
+<p>Discussion of RewriteCond, looping, and other related concepts.
+</p>
+</div><div class="top"><a href="#page-header"><img alt="top" src="../images/up.gif" /></a></div>
+<div class="section">
+<h2><a name="rewritemap" id="rewritemap">Rewrite maps</a></h2>
+<p>Discussion of RewriteMap, including simple, but heavily annotated,
+examples.</p>
+</div><div class="top"><a href="#page-header"><img alt="top" src="../images/up.gif" /></a></div>
+<div class="section">
+<h2><a name="htaccess" id="htaccess">.htaccess files</a></h2>
+<p>Discussion of the differences between rewrite rules in httpd.conf and
+in .htaccess files.</p>
+</div><div class="top"><a href="#page-header"><img alt="top" src="../images/up.gif" /></a></div>
+<div class="section">
+<h2><a name="EnvVar" id="EnvVar">Environment Variables</a></h2>
+
+<p>This module keeps track of two additional (non-standard)
+CGI/SSI environment variables named <code>SCRIPT_URL</code>和<code>SCRIPT_URI</code>. These contain the
+<em>logical</em> Web-view to the current resource, while the
+standard CGI/SSI variables <code>SCRIPT_NAME</code>和<code>SCRIPT_FILENAME</code> contain the <em>physical</em>
+System-view. </p>
+
+<p>注意：These variables hold the URI/URL <em>as they were
+initially requested</em>, <em>i.e.</em>, <em>before</em> any
+rewriting. This is important because the rewriting process is
+primarily used to rewrite logical URLs to physical
+pathnames.</p>
+
+<div class="example"><h3>Example</h3><pre>
+SCRIPT_NAME=/sw/lib/w3s/tree/global/u/rse/.www/index.html
+SCRIPT_FILENAME=/u/rse/.www/index.html
+SCRIPT_URL=/u/rse/
+SCRIPT_URI=http://en1.engelschall.com/u/rse/
+</pre></div>
+
+</div></div>
+<div id="footer">
+<p class="apache">本文允许自由使用、分发、转载，但必须保留译者署名；详见：<a href="../translator_announcement.html#announcement">译者声明</a>。</p>
+<p class="menu"><a href="../mod/index.html">模块索引</a> | <a href="../mod/directives.html">指令索引</a> | <a href="../faq/index.html">常见问题</a> | <a href="../glossary.html">词汇表</a> | <a href="../sitemap.html">站点导航</a></p></div>
+</body></html>
